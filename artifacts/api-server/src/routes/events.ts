@@ -1,6 +1,6 @@
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
-import { db, eventsTable } from "@workspace/db";
+import { db, eventsTable, deadLetterEventsTable } from "@workspace/db";
 import { IngestEventBody } from "@workspace/api-zod";
 import { requireApiKey } from "../lib/api-key-auth";
 
@@ -47,6 +47,15 @@ function anonymizeIp(ip: string | undefined): string | null {
 router.post("/v1/event", ingestLimiter, requireApiKey, async (req, res) => {
   const parsed = IngestEventBody.safeParse(req.body);
   if (!parsed.success) {
+    try {
+      await db.insert(deadLetterEventsTable).values({
+        workspaceId: typeof req.body?.workspaceId === "string" ? req.body.workspaceId : null,
+        rawPayload: JSON.stringify(req.body),
+        errorReason: JSON.stringify(parsed.error.flatten()),
+      });
+    } catch (err) {
+      // Fail silently for DLQ insertions to avoid cascading errors
+    }
     res.status(400).json({ error: "Invalid request body" });
     return;
   }

@@ -4,6 +4,7 @@ import helmet from "helmet";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import path from "node:path";
 
 const app: Express = express();
 
@@ -35,6 +36,9 @@ app.use("/api/v1/event", cors());
 
 app.use(express.json({ limit: "64kb" }));
 app.use(express.urlencoded({ extended: true, limit: "64kb" }));
+
+// Serve the tracking script publicly
+app.use("/public", express.static(path.join(__dirname, "public")));
 
 app.use("/api", router);
 

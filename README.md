@@ -7,11 +7,15 @@ A lightweight, high-performance, and type-safe web analytics and event tracking 
 ## 🚀 Key Features
 
 - **🌐 Decoupled Monorepo Architecture**: Clean separation of database schemas, API spec definitions, generated clients, frontend dash, and ingestion engines.
-- **⚡ Ingest Rate Limiting**: Built-in rate limiting and body size limits to protect resources from traffic spikes.
+- **🛡️ Resilience & Offline-First SDK**: Vanilla JS tracking SDK utilizing IndexedDB queueing and `navigator.sendBeacon` for offline-resilient event batching.
+- **📊 Advanced Behavioral Analytics**: High-performance SQL queries for 3-step Funnel drop-off and N-Day Retention Cohort analysis.
+- **⚖️ Multi-Tenant Guardrails**: Tier-based database protection leveraging `statement_timeout` and dynamic `TABLESAMPLE SYSTEM` queries for free-tier resource isolation.
+- **📥 Ingestion Dead-Letter Queue (DLQ)**: Strict Zod payload validation that catches schema drift and safely routes malformed payloads to a DLQ for inspection.
+- **⚡ Session-ization Engine**: PostgreSQL Materialized Views built via Drizzle ORM to pre-aggregate high-cardinality session data for lightning-fast dashboards.
+- **🧊 Tiered Cold Storage**: Background workers that automatically archive events older than 7 days to JSONL/S3 and purge them from the primary PostgreSQL instance to maintain optimal index sizes.
 - **🛡️ GDPR-Compliant IP Anonymization**: Automatically truncates incoming visitor IP addresses (e.g., `192.168.1.100` $\rightarrow$ `192.168.1.0`) to secure visitor privacy without sacrificing geographical region metrics.
-- **🎯 Dynamic Cohort Segmentation**: A robust, type-safe Postgres segment compiler built on Drizzle ORM that safely compiles complex client filters into optimized SQL queries.
+- **🎯 Dynamic Cohort Segmentation**: A robust, type-safe Postgres segment compiler utilizing GIN indexes for rapid arbitrary key/value filtering.
 - **🔗 Single Source of Truth Specs**: OpenAPI 3.0 specs drive both runtime Zod validation and auto-generated React Query frontend SDK hooks.
-- **🎨 Live Metrics Dashboard**: Modern dashboard displaying total events, unique page counts, top referrers, active live visitors, and custom workspace management.
 - **🧪 Dynamic Mockup Sandbox**: Isolated preview environment with a custom Vite plugin that automatically watches and dynamically imports UI mockup components for local design workflows.
 
 ---

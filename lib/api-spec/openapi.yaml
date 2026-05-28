@@ -523,6 +523,71 @@ paths:
               schema:
                 $ref: "#/components/schemas/LiveStats"
 
+  /analytics/funnel:
+    get:
+      operationId: getFunnel
+      tags: [analytics]
+      summary: Get funnel drop-off analysis
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: step1Event
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: step2Event
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: step3Event
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: days
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 7
+      responses:
+        "200":
+          description: Funnel stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FunnelResult"
+
+  /analytics/retention:
+    get:
+      operationId: getRetention
+      tags: [analytics]
+      summary: Get user retention cohorts
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: days
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 7
+      responses:
+        "200":
+          description: Retention stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RetentionResult"
+
 components:
   schemas:
     HealthStatus:
@@ -749,4 +814,26 @@ components:
         eventsLast5Min:
           type: integer
         eventsLast1Min:
+          type: integer
+
+    FunnelResult:
+      type: object
+      required: [step1, step2, step3]
+      properties:
+        step1:
+          type: integer
+        step2:
+          type: integer
+        step3:
+          type: integer
+
+    RetentionResult:
+      type: object
+      required: [day0, day1, day7]
+      properties:
+        day0:
+          type: integer
+        day1:
+          type: integer
+        day7:
           type: integer

@@ -30,15 +30,19 @@ import type {
   EventInput,
   EventResult,
   ExportEventsParams,
+  FunnelResult,
   GetAnalyticsSummaryParams,
   GetEventNamesParams,
+  GetFunnelParams,
   GetLiveStatsParams,
+  GetRetentionParams,
   GetTimeseriesParams,
   GetTopPagesParams,
   GetTopReferrersParams,
   HealthStatus,
   ListAuditLogsParams,
   LiveStats,
+  RetentionResult,
   Segment,
   SegmentInput,
   TimeseriesPoint,
@@ -1677,6 +1681,174 @@ export function useGetLiveStats<TData = Awaited<ReturnType<typeof getLiveStats>>
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetLiveStatsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetFunnelUrl = (params: GetFunnelParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/analytics/funnel?${stringifiedParams}` : `/api/analytics/funnel`
+}
+
+/**
+ * @summary Get funnel drop-off analysis
+ */
+export const getFunnel = async (params: GetFunnelParams, options?: RequestInit): Promise<FunnelResult> => {
+
+  return customFetch<FunnelResult>(getGetFunnelUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetFunnelQueryKey = (params?: GetFunnelParams,) => {
+    return [
+    `/api/analytics/funnel`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetFunnelQueryOptions = <TData = Awaited<ReturnType<typeof getFunnel>>, TError = ErrorType<unknown>>(params: GetFunnelParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getFunnel>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetFunnelQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFunnel>>> = ({ signal }) => getFunnel(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getFunnel>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetFunnelQueryResult = NonNullable<Awaited<ReturnType<typeof getFunnel>>>
+export type GetFunnelQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get funnel drop-off analysis
+ */
+
+export function useGetFunnel<TData = Awaited<ReturnType<typeof getFunnel>>, TError = ErrorType<unknown>>(
+ params: GetFunnelParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getFunnel>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetFunnelQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetRetentionUrl = (params: GetRetentionParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/analytics/retention?${stringifiedParams}` : `/api/analytics/retention`
+}
+
+/**
+ * @summary Get user retention cohorts
+ */
+export const getRetention = async (params: GetRetentionParams, options?: RequestInit): Promise<RetentionResult> => {
+
+  return customFetch<RetentionResult>(getGetRetentionUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRetentionQueryKey = (params?: GetRetentionParams,) => {
+    return [
+    `/api/analytics/retention`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetRetentionQueryOptions = <TData = Awaited<ReturnType<typeof getRetention>>, TError = ErrorType<unknown>>(params: GetRetentionParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRetention>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRetentionQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRetention>>> = ({ signal }) => getRetention(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRetention>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetRetentionQueryResult = NonNullable<Awaited<ReturnType<typeof getRetention>>>
+export type GetRetentionQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get user retention cohorts
+ */
+
+export function useGetRetention<TData = Awaited<ReturnType<typeof getRetention>>, TError = ErrorType<unknown>>(
+ params: GetRetentionParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRetention>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetRetentionQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

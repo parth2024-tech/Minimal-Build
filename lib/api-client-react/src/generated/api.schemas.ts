@@ -165,6 +165,18 @@ export interface LiveStats {
   eventsLast1Min: number;
 }
 
+export interface FunnelResult {
+  step1: number;
+  step2: number;
+  step3: number;
+}
+
+export interface RetentionResult {
+  day0: number;
+  day1: number;
+  day7: number;
+}
+
 export type ExportEventsParams = {
 workspaceId: string;
 days?: number;
@@ -210,5 +222,18 @@ workspaceId: string;
 
 export type GetLiveStatsParams = {
 workspaceId: string;
+};
+
+export type GetFunnelParams = {
+workspaceId: string;
+step1Event: string;
+step2Event: string;
+step3Event?: string;
+days?: number;
+};
+
+export type GetRetentionParams = {
+workspaceId: string;
+days?: number;
 };
 

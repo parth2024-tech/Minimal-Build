@@ -322,3 +322,40 @@ export const GetLiveStatsResponse = zod.object({
 })
 
 
+/**
+ * @summary Get funnel drop-off analysis
+ */
+export const getFunnelQueryDaysDefault = 7;
+
+export const GetFunnelQueryParams = zod.object({
+  "workspaceId": zod.coerce.string(),
+  "step1Event": zod.coerce.string(),
+  "step2Event": zod.coerce.string(),
+  "step3Event": zod.coerce.string().optional(),
+  "days": zod.coerce.number().default(getFunnelQueryDaysDefault)
+})
+
+export const GetFunnelResponse = zod.object({
+  "step1": zod.number(),
+  "step2": zod.number(),
+  "step3": zod.number()
+})
+
+
+/**
+ * @summary Get user retention cohorts
+ */
+export const getRetentionQueryDaysDefault = 7;
+
+export const GetRetentionQueryParams = zod.object({
+  "workspaceId": zod.coerce.string(),
+  "days": zod.coerce.number().default(getRetentionQueryDaysDefault)
+})
+
+export const GetRetentionResponse = zod.object({
+  "day0": zod.number(),
+  "day1": zod.number(),
+  "day7": zod.number()
+})
+
+
