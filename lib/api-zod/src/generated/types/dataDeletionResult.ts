@@ -6,9 +6,6 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export type GetTopPagesParams = {
-workspaceId: string;
-days?: number;
-limit?: number;
-segmentId?: string;
-};
+export interface DataDeletionResult {
+  deletedCount: number;
+}

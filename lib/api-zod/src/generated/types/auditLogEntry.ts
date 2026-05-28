@@ -5,11 +5,14 @@
  * PrivatePulse privacy-first analytics API
  * OpenAPI spec version: 0.2.0
  */
+import type { AuditLogEntryMeta } from './auditLogEntryMeta';
 
-export interface ApiKey {
+export interface AuditLogEntry {
   id: string;
   workspaceId: string;
-  name: string;
-  prefix: string;
+  action: string;
+  actor: string;
+  /** @nullable */
+  meta?: AuditLogEntryMeta;
   createdAt: string;
 }

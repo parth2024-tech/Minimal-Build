@@ -6,9 +6,9 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export type GetTopPagesParams = {
+export type ExportEventsParams = {
 workspaceId: string;
 days?: number;
-limit?: number;
+eventName?: string;
 segmentId?: string;
 };

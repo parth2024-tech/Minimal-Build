@@ -3,16 +3,21 @@
  * Do not edit manually.
  * Api
  * PrivatePulse privacy-first analytics API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 export * from './analyticsSummary';
 export * from './apiKey';
 export * from './apiKeyInput';
 export * from './apiKeyWithSecret';
+export * from './auditLogEntry';
+export * from './auditLogEntryMeta';
+export * from './dataDeletionInput';
+export * from './dataDeletionResult';
 export * from './eventInput';
 export * from './eventInputProperties';
 export * from './eventResult';
+export * from './exportEventsParams';
 export * from './getAnalyticsSummaryParams';
 export * from './getEventNamesParams';
 export * from './getLiveStatsParams';
@@ -20,7 +25,13 @@ export * from './getTimeseriesParams';
 export * from './getTopPagesParams';
 export * from './getTopReferrersParams';
 export * from './healthStatus';
+export * from './listAuditLogsParams';
 export * from './liveStats';
+export * from './segment';
+export * from './segmentCondition';
+export * from './segmentConditionField';
+export * from './segmentConditionOp';
+export * from './segmentInput';
 export * from './timeseriesPoint';
 export * from './topPage';
 export * from './topReferrer';

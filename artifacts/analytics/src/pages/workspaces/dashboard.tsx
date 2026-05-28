@@ -7,11 +7,12 @@ import {
   useGetTopPages, 
   useGetTopReferrers, 
   useGetEventNames, 
-  useGetLiveStats 
+  useGetLiveStats,
+  useListSegments
 } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BarChart2, Users, Activity, TrendingUp, TrendingDown, Clock } from "lucide-react";
+import { BarChart2, Users, Activity, TrendingUp, TrendingDown, Clock, Download, Filter } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { format } from "date-fns";
 
@@ -19,11 +20,39 @@ export default function WorkspaceDashboard() {
   const { workspaceId } = useParams();
   const [days, setDays] = useState<number>(30);
   const [eventName, setEventName] = useState<string>("all");
+  const [segmentId, setSegmentId] = useState<string>("all");
 
-  const { data: summary, isLoading: loadingSummary } = useGetAnalyticsSummary({ workspaceId: workspaceId!, days });
-  const { data: timeseries } = useGetTimeseries({ workspaceId: workspaceId!, days, eventName: eventName === "all" ? undefined : eventName });
-  const { data: topPages } = useGetTopPages({ workspaceId: workspaceId!, days, limit: 10 });
-  const { data: topReferrers } = useGetTopReferrers({ workspaceId: workspaceId!, days, limit: 10 });
+  const { data: segments } = useListSegments(workspaceId!);
+
+  const activeSegmentId = segmentId === "all" ? undefined : segmentId;
+
+  const { data: summary, isLoading: loadingSummary } = useGetAnalyticsSummary({ 
+    workspaceId: workspaceId!, 
+    days,
+    segmentId: activeSegmentId
+  });
+  
+  const { data: timeseries } = useGetTimeseries({ 
+    workspaceId: workspaceId!, 
+    days, 
+    eventName: eventName === "all" ? undefined : eventName,
+    segmentId: activeSegmentId
+  });
+  
+  const { data: topPages } = useGetTopPages({ 
+    workspaceId: workspaceId!, 
+    days, 
+    limit: 10,
+    segmentId: activeSegmentId
+  });
+  
+  const { data: topReferrers } = useGetTopReferrers({ 
+    workspaceId: workspaceId!, 
+    days, 
+    limit: 10,
+    segmentId: activeSegmentId
+  });
+  
   const { data: eventNames } = useGetEventNames({ workspaceId: workspaceId! });
   const { data: liveStats } = useGetLiveStats({ workspaceId: workspaceId! }, { query: { refetchInterval: 10000 } });
 
@@ -40,7 +69,7 @@ export default function WorkspaceDashboard() {
             <p className="text-sm text-gray-500">Monitor your workspace traffic and events.</p>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             {liveStats && (
               <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-700 rounded-full border border-green-200">
                 <span className="relative flex h-2 w-2">
@@ -50,6 +79,21 @@ export default function WorkspaceDashboard() {
                 <span className="text-sm font-medium">{liveStats.eventsLast5Min} events past 5m</span>
               </div>
             )}
+
+            <Select value={segmentId} onValueChange={setSegmentId}>
+              <SelectTrigger className="w-[160px]">
+                <div className="flex items-center gap-2">
+                  <Filter className="w-4 h-4 text-muted-foreground" />
+                  <SelectValue placeholder="All Traffic" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Traffic</SelectItem>
+                {segments?.map((seg) => (
+                  <SelectItem key={seg.id} value={seg.id}>{seg.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
             <Select value={eventName} onValueChange={setEventName}>
               <SelectTrigger className="w-[160px]">
@@ -73,11 +117,20 @@ export default function WorkspaceDashboard() {
                 <SelectItem value="90">Last 90 Days</SelectItem>
               </SelectContent>
             </Select>
+
+            <a 
+              href={`/api/analytics/export?workspaceId=${workspaceId}&days=${days}`}
+              download
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-50 transition-colors shadow-sm"
+            >
+              <Download className="w-4 h-4" />
+              Export CSV
+            </a>
           </div>
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -100,7 +153,7 @@ export default function WorkspaceDashboard() {
                   ) : (
                     <span className="text-gray-500">0% change</span>
                   )}
-                  <span className="text-gray-400 ml-1">vs previous period</span>
+                  <span className="text-gray-400 ml-1">vs previous</span>
                 </div>
               )}
             </CardContent>
@@ -126,8 +179,24 @@ export default function WorkspaceDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-1">Avg / day</p>
+                  <h3 className="text-3xl font-bold text-gray-900">
+                    {loadingSummary ? "-" : summary?.avgEventsPerDay?.toLocaleString(undefined, { maximumFractionDigits: 1 }) || "0"}
+                  </h3>
+                </div>
+                <div className="p-3 bg-orange-50 rounded-lg">
+                  <Clock className="w-6 h-6 text-orange-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
                   <p className="text-sm font-medium text-muted-foreground mb-1">Top Event</p>
-                  <h3 className="text-xl font-bold text-gray-900 truncate max-w-[150px]">
+                  <h3 className="text-xl font-bold text-gray-900 truncate max-w-[120px]">
                     {loadingSummary ? "-" : (summary?.topEventName || "None")}
                   </h3>
                 </div>

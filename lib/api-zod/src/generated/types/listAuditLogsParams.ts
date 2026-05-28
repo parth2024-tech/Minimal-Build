@@ -6,9 +6,7 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export type GetTopPagesParams = {
+export type ListAuditLogsParams = {
 workspaceId: string;
-days?: number;
 limit?: number;
-segmentId?: string;
 };

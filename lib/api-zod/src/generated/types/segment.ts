@@ -5,11 +5,12 @@
  * PrivatePulse privacy-first analytics API
  * OpenAPI spec version: 0.2.0
  */
+import type { SegmentCondition } from './segmentCondition';
 
-export interface ApiKey {
+export interface Segment {
   id: string;
   workspaceId: string;
   name: string;
-  prefix: string;
+  conditions: SegmentCondition[];
   createdAt: string;
 }

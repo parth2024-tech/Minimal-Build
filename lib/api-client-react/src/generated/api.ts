@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Api
  * PrivatePulse privacy-first analytics API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import {
   useMutation,
@@ -24,8 +24,12 @@ import type {
   ApiKey,
   ApiKeyInput,
   ApiKeyWithSecret,
+  AuditLogEntry,
+  DataDeletionInput,
+  DataDeletionResult,
   EventInput,
   EventResult,
+  ExportEventsParams,
   GetAnalyticsSummaryParams,
   GetEventNamesParams,
   GetLiveStatsParams,
@@ -33,7 +37,10 @@ import type {
   GetTopPagesParams,
   GetTopReferrersParams,
   HealthStatus,
+  ListAuditLogsParams,
   LiveStats,
+  Segment,
+  SegmentInput,
   TimeseriesPoint,
   TopPage,
   TopReferrer,
@@ -716,6 +723,467 @@ export const useDeleteApiKey = <TError = ErrorType<unknown>,
       > => {
       return useMutation(getDeleteApiKeyMutationOptions(options));
     }
+
+export const getListSegmentsUrl = (workspaceId: string,) => {
+
+
+
+
+  return `/api/workspaces/${workspaceId}/segments`
+}
+
+/**
+ * @summary List saved segments for a workspace
+ */
+export const listSegments = async (workspaceId: string, options?: RequestInit): Promise<Segment[]> => {
+
+  return customFetch<Segment[]>(getListSegmentsUrl(workspaceId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListSegmentsQueryKey = (workspaceId: string,) => {
+    return [
+    `/api/workspaces/${workspaceId}/segments`
+    ] as const;
+    }
+
+
+export const getListSegmentsQueryOptions = <TData = Awaited<ReturnType<typeof listSegments>>, TError = ErrorType<unknown>>(workspaceId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listSegments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListSegmentsQueryKey(workspaceId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listSegments>>> = ({ signal }) => listSegments(workspaceId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(workspaceId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listSegments>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListSegmentsQueryResult = NonNullable<Awaited<ReturnType<typeof listSegments>>>
+export type ListSegmentsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List saved segments for a workspace
+ */
+
+export function useListSegments<TData = Awaited<ReturnType<typeof listSegments>>, TError = ErrorType<unknown>>(
+ workspaceId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listSegments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListSegmentsQueryOptions(workspaceId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateSegmentUrl = (workspaceId: string,) => {
+
+
+
+
+  return `/api/workspaces/${workspaceId}/segments`
+}
+
+/**
+ * @summary Create a new segment
+ */
+export const createSegment = async (workspaceId: string,
+    segmentInput: SegmentInput, options?: RequestInit): Promise<Segment> => {
+
+  return customFetch<Segment>(getCreateSegmentUrl(workspaceId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      segmentInput,)
+  }
+);}
+
+
+
+
+export const getCreateSegmentMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSegment>>, TError,{workspaceId: string;data: BodyType<SegmentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createSegment>>, TError,{workspaceId: string;data: BodyType<SegmentInput>}, TContext> => {
+
+const mutationKey = ['createSegment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createSegment>>, {workspaceId: string;data: BodyType<SegmentInput>}> = (props) => {
+          const {workspaceId,data} = props ?? {};
+
+          return  createSegment(workspaceId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateSegmentMutationResult = NonNullable<Awaited<ReturnType<typeof createSegment>>>
+    export type CreateSegmentMutationBody = BodyType<SegmentInput>
+    export type CreateSegmentMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create a new segment
+ */
+export const useCreateSegment = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSegment>>, TError,{workspaceId: string;data: BodyType<SegmentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createSegment>>,
+        TError,
+        {workspaceId: string;data: BodyType<SegmentInput>},
+        TContext
+      > => {
+      return useMutation(getCreateSegmentMutationOptions(options));
+    }
+
+export const getDeleteSegmentUrl = (workspaceId: string,
+    segmentId: string,) => {
+
+
+
+
+  return `/api/workspaces/${workspaceId}/segments/${segmentId}`
+}
+
+/**
+ * @summary Delete a segment
+ */
+export const deleteSegment = async (workspaceId: string,
+    segmentId: string, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteSegmentUrl(workspaceId,segmentId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteSegmentMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSegment>>, TError,{workspaceId: string;segmentId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteSegment>>, TError,{workspaceId: string;segmentId: string}, TContext> => {
+
+const mutationKey = ['deleteSegment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteSegment>>, {workspaceId: string;segmentId: string}> = (props) => {
+          const {workspaceId,segmentId} = props ?? {};
+
+          return  deleteSegment(workspaceId,segmentId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteSegmentMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSegment>>>
+
+    export type DeleteSegmentMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Delete a segment
+ */
+export const useDeleteSegment = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSegment>>, TError,{workspaceId: string;segmentId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteSegment>>,
+        TError,
+        {workspaceId: string;segmentId: string},
+        TContext
+      > => {
+      return useMutation(getDeleteSegmentMutationOptions(options));
+    }
+
+export const getExportEventsUrl = (params: ExportEventsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/analytics/export?${stringifiedParams}` : `/api/analytics/export`
+}
+
+/**
+ * @summary Export events as CSV (sync, max 10 000 rows)
+ */
+export const exportEvents = async (params: ExportEventsParams, options?: RequestInit): Promise<string> => {
+
+  return customFetch<string>(getExportEventsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getExportEventsQueryKey = (params?: ExportEventsParams,) => {
+    return [
+    `/api/analytics/export`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getExportEventsQueryOptions = <TData = Awaited<ReturnType<typeof exportEvents>>, TError = ErrorType<unknown>>(params: ExportEventsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof exportEvents>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getExportEventsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof exportEvents>>> = ({ signal }) => exportEvents(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof exportEvents>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ExportEventsQueryResult = NonNullable<Awaited<ReturnType<typeof exportEvents>>>
+export type ExportEventsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Export events as CSV (sync, max 10 000 rows)
+ */
+
+export function useExportEvents<TData = Awaited<ReturnType<typeof exportEvents>>, TError = ErrorType<unknown>>(
+ params: ExportEventsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof exportEvents>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getExportEventsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getDeleteWorkspaceDataUrl = (workspaceId: string,) => {
+
+
+
+
+  return `/api/workspaces/${workspaceId}/data`
+}
+
+/**
+ * @summary GDPR — delete raw event data for a workspace (keeps workspace metadata)
+ */
+export const deleteWorkspaceData = async (workspaceId: string,
+    dataDeletionInput?: DataDeletionInput, options?: RequestInit): Promise<DataDeletionResult> => {
+
+  return customFetch<DataDeletionResult>(getDeleteWorkspaceDataUrl(workspaceId),
+  {
+    ...options,
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      dataDeletionInput,)
+  }
+);}
+
+
+
+
+export const getDeleteWorkspaceDataMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteWorkspaceData>>, TError,{workspaceId: string;data?: BodyType<DataDeletionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteWorkspaceData>>, TError,{workspaceId: string;data?: BodyType<DataDeletionInput>}, TContext> => {
+
+const mutationKey = ['deleteWorkspaceData'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteWorkspaceData>>, {workspaceId: string;data?: BodyType<DataDeletionInput>}> = (props) => {
+          const {workspaceId,data} = props ?? {};
+
+          return  deleteWorkspaceData(workspaceId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteWorkspaceDataMutationResult = NonNullable<Awaited<ReturnType<typeof deleteWorkspaceData>>>
+    export type DeleteWorkspaceDataMutationBody = BodyType<DataDeletionInput> | undefined
+    export type DeleteWorkspaceDataMutationError = ErrorType<unknown>
+
+    /**
+ * @summary GDPR — delete raw event data for a workspace (keeps workspace metadata)
+ */
+export const useDeleteWorkspaceData = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteWorkspaceData>>, TError,{workspaceId: string;data?: BodyType<DataDeletionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteWorkspaceData>>,
+        TError,
+        {workspaceId: string;data?: BodyType<DataDeletionInput>},
+        TContext
+      > => {
+      return useMutation(getDeleteWorkspaceDataMutationOptions(options));
+    }
+
+export const getListAuditLogsUrl = (params: ListAuditLogsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/analytics/audit-logs?${stringifiedParams}` : `/api/analytics/audit-logs`
+}
+
+/**
+ * @summary List audit log entries for a workspace
+ */
+export const listAuditLogs = async (params: ListAuditLogsParams, options?: RequestInit): Promise<AuditLogEntry[]> => {
+
+  return customFetch<AuditLogEntry[]>(getListAuditLogsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListAuditLogsQueryKey = (params?: ListAuditLogsParams,) => {
+    return [
+    `/api/analytics/audit-logs`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListAuditLogsQueryOptions = <TData = Awaited<ReturnType<typeof listAuditLogs>>, TError = ErrorType<unknown>>(params: ListAuditLogsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAuditLogs>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAuditLogsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAuditLogs>>> = ({ signal }) => listAuditLogs(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAuditLogs>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListAuditLogsQueryResult = NonNullable<Awaited<ReturnType<typeof listAuditLogs>>>
+export type ListAuditLogsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List audit log entries for a workspace
+ */
+
+export function useListAuditLogs<TData = Awaited<ReturnType<typeof listAuditLogs>>, TError = ErrorType<unknown>>(
+ params: ListAuditLogsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAuditLogs>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListAuditLogsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
 
 export const getGetAnalyticsSummaryUrl = (params: GetAnalyticsSummaryParams,) => {
   const normalizedParams = new URLSearchParams();

@@ -4,6 +4,10 @@ import workspacesRouter from "./workspaces";
 import apiKeysRouter from "./api-keys";
 import eventsRouter from "./events";
 import analyticsRouter from "./analytics";
+import segmentsRouter from "./segments";
+import exportRouter from "./export";
+import auditRouter from "./audit";
+import gdprRouter from "./gdpr";
 
 const router: IRouter = Router();
 
@@ -12,5 +16,9 @@ router.use(workspacesRouter);
 router.use(apiKeysRouter);
 router.use(eventsRouter);
 router.use(analyticsRouter);
+router.use(segmentsRouter);
+router.use(exportRouter);
+router.use(auditRouter);
+router.use(gdprRouter);
 
 export default router;

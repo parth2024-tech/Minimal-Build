@@ -5,10 +5,11 @@
  * PrivatePulse privacy-first analytics API
  * OpenAPI spec version: 0.2.0
  */
+import type { SegmentCondition } from './segmentCondition';
 
-export interface WorkspaceInput {
+export interface SegmentInput {
   /** @minLength 1 */
   name: string;
-  /** @minLength 1 */
-  domain: string;
+  /** @minItems 1 */
+  conditions: SegmentCondition[];
 }

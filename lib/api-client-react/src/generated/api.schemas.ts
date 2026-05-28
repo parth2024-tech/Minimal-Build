@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Api
  * PrivatePulse privacy-first analytics API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 export interface HealthStatus {
   status: string;
@@ -67,12 +67,82 @@ export interface ApiKeyWithSecret {
   secret: string;
 }
 
+export type SegmentConditionField = typeof SegmentConditionField[keyof typeof SegmentConditionField];
+
+
+export const SegmentConditionField = {
+  url: 'url',
+  referrer: 'referrer',
+  event_name: 'event_name',
+  user_agent: 'user_agent',
+} as const;
+
+export type SegmentConditionOp = typeof SegmentConditionOp[keyof typeof SegmentConditionOp];
+
+
+export const SegmentConditionOp = {
+  contains: 'contains',
+  not_contains: 'not_contains',
+  equals: 'equals',
+  not_equals: 'not_equals',
+  starts_with: 'starts_with',
+} as const;
+
+export interface SegmentCondition {
+  field: SegmentConditionField;
+  op: SegmentConditionOp;
+  value: string;
+}
+
+export interface Segment {
+  id: string;
+  workspaceId: string;
+  name: string;
+  conditions: SegmentCondition[];
+  createdAt: string;
+}
+
+export interface SegmentInput {
+  /** @minLength 1 */
+  name: string;
+  /** @minItems 1 */
+  conditions: SegmentCondition[];
+}
+
+/**
+ * @nullable
+ */
+export type AuditLogEntryMeta = { [key: string]: unknown } | null;
+
+export interface AuditLogEntry {
+  id: string;
+  workspaceId: string;
+  action: string;
+  actor: string;
+  /** @nullable */
+  meta?: AuditLogEntryMeta;
+  createdAt: string;
+}
+
+export interface DataDeletionInput {
+  /**
+     * Only delete events older than N days. Omit to delete all.
+     * @nullable
+     */
+  olderThanDays?: number | null;
+}
+
+export interface DataDeletionResult {
+  deletedCount: number;
+}
+
 export interface AnalyticsSummary {
   totalEvents: number;
   uniquePages: number;
   /** @nullable */
   topEventName: string | null;
   changePercent: number;
+  avgEventsPerDay: number;
 }
 
 export interface TimeseriesPoint {
@@ -95,27 +165,43 @@ export interface LiveStats {
   eventsLast1Min: number;
 }
 
+export type ExportEventsParams = {
+workspaceId: string;
+days?: number;
+eventName?: string;
+segmentId?: string;
+};
+
+export type ListAuditLogsParams = {
+workspaceId: string;
+limit?: number;
+};
+
 export type GetAnalyticsSummaryParams = {
 workspaceId: string;
 days?: number;
+segmentId?: string;
 };
 
 export type GetTimeseriesParams = {
 workspaceId: string;
 days?: number;
 eventName?: string;
+segmentId?: string;
 };
 
 export type GetTopPagesParams = {
 workspaceId: string;
 days?: number;
 limit?: number;
+segmentId?: string;
 };
 
 export type GetTopReferrersParams = {
 workspaceId: string;
 days?: number;
 limit?: number;
+segmentId?: string;
 };
 
 export type GetEventNamesParams = {

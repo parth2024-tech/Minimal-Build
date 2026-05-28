@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Api
  * PrivatePulse privacy-first analytics API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import * as zod from 'zod';
 
@@ -119,20 +119,123 @@ export const DeleteApiKeyParams = zod.object({
 
 
 /**
+ * @summary List saved segments for a workspace
+ */
+export const ListSegmentsParams = zod.object({
+  "workspaceId": zod.coerce.string()
+})
+
+export const ListSegmentsResponseItem = zod.object({
+  "id": zod.string(),
+  "workspaceId": zod.string(),
+  "name": zod.string(),
+  "conditions": zod.array(zod.object({
+  "field": zod.enum(['url', 'referrer', 'event_name', 'user_agent']),
+  "op": zod.enum(['contains', 'not_contains', 'equals', 'not_equals', 'starts_with']),
+  "value": zod.string()
+})),
+  "createdAt": zod.string()
+})
+export const ListSegmentsResponse = zod.array(ListSegmentsResponseItem)
+
+
+/**
+ * @summary Create a new segment
+ */
+export const CreateSegmentParams = zod.object({
+  "workspaceId": zod.coerce.string()
+})
+
+
+
+
+
+export const CreateSegmentBody = zod.object({
+  "name": zod.string().min(1),
+  "conditions": zod.array(zod.object({
+  "field": zod.enum(['url', 'referrer', 'event_name', 'user_agent']),
+  "op": zod.enum(['contains', 'not_contains', 'equals', 'not_equals', 'starts_with']),
+  "value": zod.string()
+})).min(1)
+})
+
+
+/**
+ * @summary Delete a segment
+ */
+export const DeleteSegmentParams = zod.object({
+  "workspaceId": zod.coerce.string(),
+  "segmentId": zod.coerce.string()
+})
+
+
+/**
+ * @summary Export events as CSV (sync, max 10 000 rows)
+ */
+export const exportEventsQueryDaysDefault = 7;
+
+export const ExportEventsQueryParams = zod.object({
+  "workspaceId": zod.coerce.string(),
+  "days": zod.coerce.number().default(exportEventsQueryDaysDefault),
+  "eventName": zod.coerce.string().optional(),
+  "segmentId": zod.coerce.string().optional()
+})
+
+
+/**
+ * @summary GDPR — delete raw event data for a workspace (keeps workspace metadata)
+ */
+export const DeleteWorkspaceDataParams = zod.object({
+  "workspaceId": zod.coerce.string()
+})
+
+export const DeleteWorkspaceDataBody = zod.object({
+  "olderThanDays": zod.number().nullish().describe('Only delete events older than N days. Omit to delete all.')
+})
+
+export const DeleteWorkspaceDataResponse = zod.object({
+  "deletedCount": zod.number()
+})
+
+
+/**
+ * @summary List audit log entries for a workspace
+ */
+export const listAuditLogsQueryLimitDefault = 50;
+
+export const ListAuditLogsQueryParams = zod.object({
+  "workspaceId": zod.coerce.string(),
+  "limit": zod.coerce.number().default(listAuditLogsQueryLimitDefault)
+})
+
+export const ListAuditLogsResponseItem = zod.object({
+  "id": zod.string(),
+  "workspaceId": zod.string(),
+  "action": zod.string(),
+  "actor": zod.string(),
+  "meta": zod.record(zod.string(), zod.unknown()).nullish(),
+  "createdAt": zod.string()
+})
+export const ListAuditLogsResponse = zod.array(ListAuditLogsResponseItem)
+
+
+/**
  * @summary Get summary stats for a workspace
  */
 export const getAnalyticsSummaryQueryDaysDefault = 7;
 
 export const GetAnalyticsSummaryQueryParams = zod.object({
   "workspaceId": zod.coerce.string(),
-  "days": zod.coerce.number().default(getAnalyticsSummaryQueryDaysDefault)
+  "days": zod.coerce.number().default(getAnalyticsSummaryQueryDaysDefault),
+  "segmentId": zod.coerce.string().optional()
 })
 
 export const GetAnalyticsSummaryResponse = zod.object({
   "totalEvents": zod.number(),
   "uniquePages": zod.number(),
   "topEventName": zod.string().nullable(),
-  "changePercent": zod.number()
+  "changePercent": zod.number(),
+  "avgEventsPerDay": zod.number()
 })
 
 
@@ -144,7 +247,8 @@ export const getTimeseriesQueryDaysDefault = 7;
 export const GetTimeseriesQueryParams = zod.object({
   "workspaceId": zod.coerce.string(),
   "days": zod.coerce.number().default(getTimeseriesQueryDaysDefault),
-  "eventName": zod.coerce.string().optional()
+  "eventName": zod.coerce.string().optional(),
+  "segmentId": zod.coerce.string().optional()
 })
 
 export const GetTimeseriesResponseItem = zod.object({
@@ -163,7 +267,8 @@ export const getTopPagesQueryLimitDefault = 10;
 export const GetTopPagesQueryParams = zod.object({
   "workspaceId": zod.coerce.string(),
   "days": zod.coerce.number().default(getTopPagesQueryDaysDefault),
-  "limit": zod.coerce.number().default(getTopPagesQueryLimitDefault)
+  "limit": zod.coerce.number().default(getTopPagesQueryLimitDefault),
+  "segmentId": zod.coerce.string().optional()
 })
 
 export const GetTopPagesResponseItem = zod.object({
@@ -182,7 +287,8 @@ export const getTopReferrersQueryLimitDefault = 10;
 export const GetTopReferrersQueryParams = zod.object({
   "workspaceId": zod.coerce.string(),
   "days": zod.coerce.number().default(getTopReferrersQueryDaysDefault),
-  "limit": zod.coerce.number().default(getTopReferrersQueryLimitDefault)
+  "limit": zod.coerce.number().default(getTopReferrersQueryLimitDefault),
+  "segmentId": zod.coerce.string().optional()
 })
 
 export const GetTopReferrersResponseItem = zod.object({
