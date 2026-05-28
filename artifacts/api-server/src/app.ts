@@ -1,5 +1,6 @@
-import express, { type Express } from "express";
+import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
+import helmet from "helmet";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
@@ -25,10 +26,22 @@ app.use(
     },
   }),
 );
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+app.use(helmet());
+
+// Public ingest endpoint must accept cross-origin requests (called from customer sites).
+// All other API routes get no CORS header — same-origin only.
+app.use("/api/v1/event", cors());
+
+app.use(express.json({ limit: "64kb" }));
+app.use(express.urlencoded({ extended: true, limit: "64kb" }));
 
 app.use("/api", router);
+
+// Global error handler — prevent stack traces leaking in responses
+app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  logger.error({ err }, "Unhandled route error");
+  res.status(500).json({ error: "Internal server error" });
+});
 
 export default app;
