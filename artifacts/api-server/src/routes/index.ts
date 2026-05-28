@@ -9,7 +9,12 @@ import exportRouter from "./export";
 import auditRouter from "./audit";
 import gdprRouter from "./gdpr";
 
+/**
+ * Main application router registration.
+ * Orchestrates and mounts all API resource sub-routers.
+ */
 const router: IRouter = Router();
+
 
 router.use(healthRouter);
 router.use(workspacesRouter);
