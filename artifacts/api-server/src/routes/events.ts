@@ -14,6 +14,13 @@ const ingestLimiter = rateLimit({
   message: { error: "Too many requests. Slow down and try again shortly." },
 });
 
+/**
+ * Anonymizes an IP address to preserve user privacy (GDPR compliance).
+ * Truncates IPv4 addresses to Class C subnet format.
+ *
+ * @param ip Raw client IP address string
+ * @returns Anonymized IP string or null
+ */
 function anonymizeIp(ip: string | undefined): string | null {
   if (!ip) return null;
   const parts = ip.split(".");
@@ -23,6 +30,20 @@ function anonymizeIp(ip: string | undefined): string | null {
   return null;
 }
 
+/**
+ * @openapi
+ * /api/v1/event:
+ *   post:
+ *     summary: Ingest an analytics event
+ *     description: Ingests a new page view or custom user event from client tracking scripts.
+ *     responses:
+ *       201:
+ *         description: Event recorded successfully.
+ *       400:
+ *         description: Invalid request payload.
+ *       429:
+ *         description: Too many requests (rate limit exceeded).
+ */
 router.post("/v1/event", ingestLimiter, requireApiKey, async (req, res) => {
   const parsed = IngestEventBody.safeParse(req.body);
   if (!parsed.success) {
@@ -48,3 +69,4 @@ router.post("/v1/event", ingestLimiter, requireApiKey, async (req, res) => {
 });
 
 export default router;
+
