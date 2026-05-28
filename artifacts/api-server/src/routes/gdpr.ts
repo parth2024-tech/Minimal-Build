@@ -10,8 +10,21 @@ const DeleteWorkspaceDataBody = z.object({
   olderThanDays: z.number().int().min(1).max(3650).optional(),
 });
 
+/**
+ * @openapi
+ * /api/workspaces/{workspaceId}/data:
+ *   delete:
+ *     summary: GDPR data deletion request
+ *     description: Permanently delete raw event logs associated with a workspace (keeps workspace workspace details). Supports optional olderThanDays filter.
+ *     responses:
+ *       200:
+ *         description: Event data successfully deleted.
+ *       400:
+ *         description: Validation error.
+ */
 router.delete("/workspaces/:workspaceId/data", async (req, res) => {
   const paramsParsed = DeleteWorkspaceDataParams.safeParse(req.params);
+
   if (!paramsParsed.success) {
     res.status(400).json({ error: "Invalid workspace ID" });
     return;
