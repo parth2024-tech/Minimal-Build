@@ -5,8 +5,21 @@ import { ListAuditLogsQueryParams } from "@workspace/api-zod";
 
 const router = Router();
 
+/**
+ * @openapi
+ * /api/analytics/audit-logs:
+ *   get:
+ *     summary: Retrieve workspace audit logs
+ *     description: Retrieve audit logs detailing administrative changes in the workspace.
+ *     responses:
+ *       200:
+ *         description: List of audit log actions.
+ *       400:
+ *         description: Validation error.
+ */
 router.get("/analytics/audit-logs", async (req, res) => {
   const parsed = ListAuditLogsQueryParams.safeParse(req.query);
+
   if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
 
   const { workspaceId, limit = 50 } = parsed.data;
