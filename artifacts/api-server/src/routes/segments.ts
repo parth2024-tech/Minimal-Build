@@ -10,8 +10,21 @@ import {
 
 const router = Router();
 
+/**
+ * @openapi
+ * /api/workspaces/{workspaceId}/segments:
+ *   get:
+ *     summary: List saved segments
+ *     description: Retrieve all cohort segments configured for a workspace.
+ *     responses:
+ *       200:
+ *         description: Array of saved segment objects.
+ *       400:
+ *         description: Validation error.
+ */
 router.get("/workspaces/:workspaceId/segments", async (req, res) => {
   const parsed = ListSegmentsParams.safeParse(req.params);
+
   if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
 
   const rows = await db.select().from(segmentsTable)
