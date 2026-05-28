@@ -13,6 +13,13 @@ import { buildSegmentConditions } from "./segment-filter";
 
 const router = Router();
 
+/**
+ * Resolves database segment where-conditions based on stored segment parameters.
+ *
+ * @param workspaceId Workspace unique identifier
+ * @param segmentId Cohort Segment unique identifier
+ * @returns Array of compiled Drizzle SQL expressions
+ */
 async function resolveSegmentConditions(workspaceId: string, segmentId?: string): Promise<SQL[]> {
   if (!segmentId) return [];
   const [segment] = await db.select().from(segmentsTable)
@@ -21,7 +28,20 @@ async function resolveSegmentConditions(workspaceId: string, segmentId?: string)
   return buildSegmentConditions(segment.conditions);
 }
 
+/**
+ * @openapi
+ * /api/analytics/summary:
+ *   get:
+ *     summary: Retrieve analytics summary
+ *     description: Retrieve total events, unique page counts, top events, and change percentages for a workspace.
+ *     responses:
+ *       200:
+ *         description: Consolidated analytics overview metrics.
+ *       400:
+ *         description: Validation error.
+ */
 router.get("/analytics/summary", async (req, res) => {
+
   const parsed = GetAnalyticsSummaryQueryParams.safeParse(req.query);
   if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
 
