@@ -6,8 +6,21 @@ import { buildSegmentConditions } from "./segment-filter";
 
 const router = Router();
 
+/**
+ * @openapi
+ * /api/analytics/export:
+ *   get:
+ *     summary: Export event logs as CSV
+ *     description: Retrieve detailed events database logs for a workspace formatted as CSV. Max 10,000 records.
+ *     responses:
+ *       200:
+ *         description: CSV text payload file containing events history.
+ *       400:
+ *         description: Invalid query parameters.
+ */
 router.get("/analytics/export", async (req, res) => {
   const parsed = ExportEventsQueryParams.safeParse(req.query);
+
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid query parameters" });
     return;
