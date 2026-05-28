@@ -1,22 +1,28 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: PrivatePulse privacy-first analytics API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: events
+    description: Event ingestion
+  - name: analytics
+    description: Analytics queries
+  - name: workspaces
+    description: Workspace management
+  - name: apikeys
+    description: API key management
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +30,464 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /v1/event:
+    post:
+      operationId: ingestEvent
+      tags: [events]
+      summary: Ingest an analytics event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventInput"
+      responses:
+        "201":
+          description: Event recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventResult"
+        "400":
+          description: Validation error
+
+  /workspaces:
+    get:
+      operationId: listWorkspaces
+      tags: [workspaces]
+      summary: List all workspaces
+      responses:
+        "200":
+          description: List of workspaces
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Workspace"
+    post:
+      operationId: createWorkspace
+      tags: [workspaces]
+      summary: Create a new workspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkspaceInput"
+      responses:
+        "201":
+          description: Workspace created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workspace"
+
+  /workspaces/{workspaceId}:
+    get:
+      operationId: getWorkspace
+      tags: [workspaces]
+      summary: Get a workspace by ID
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Workspace
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workspace"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteWorkspace
+      tags: [workspaces]
+      summary: Delete a workspace and all its data
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /workspaces/{workspaceId}/api-keys:
+    get:
+      operationId: listApiKeys
+      tags: [apikeys]
+      summary: List API keys for a workspace
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of API keys
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiKey"
+    post:
+      operationId: createApiKey
+      tags: [apikeys]
+      summary: Create a new API key
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiKeyInput"
+      responses:
+        "201":
+          description: API key created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiKeyWithSecret"
+
+  /workspaces/{workspaceId}/api-keys/{keyId}:
+    delete:
+      operationId: deleteApiKey
+      tags: [apikeys]
+      summary: Delete an API key
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: keyId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /analytics/summary:
+    get:
+      operationId: getAnalyticsSummary
+      tags: [analytics]
+      summary: Get summary stats for a workspace
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: days
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 7
+      responses:
+        "200":
+          description: Summary statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyticsSummary"
+
+  /analytics/timeseries:
+    get:
+      operationId: getTimeseries
+      tags: [analytics]
+      summary: Get event counts over time
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: days
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 7
+        - name: eventName
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Time series data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TimeseriesPoint"
+
+  /analytics/top-pages:
+    get:
+      operationId: getTopPages
+      tags: [analytics]
+      summary: Get top pages by event count
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: days
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 7
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Top pages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TopPage"
+
+  /analytics/top-referrers:
+    get:
+      operationId: getTopReferrers
+      tags: [analytics]
+      summary: Get top referrers by event count
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: days
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 7
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Top referrers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TopReferrer"
+
+  /analytics/event-names:
+    get:
+      operationId: getEventNames
+      tags: [analytics]
+      summary: Get distinct event names for a workspace
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of event names
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /analytics/live:
+    get:
+      operationId: getLiveStats
+      tags: [analytics]
+      summary: Get live stats for the last 5 minutes
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Live stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LiveStats"
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    EventInput:
+      type: object
+      required: [workspaceId, eventName]
+      properties:
+        workspaceId:
+          type: string
+        eventName:
+          type: string
+        url:
+          type: ["string", "null"]
+        referrer:
+          type: ["string", "null"]
+        userAgent:
+          type: ["string", "null"]
+        properties:
+          type: ["object", "null"]
+          additionalProperties: true
+
+    EventResult:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: string
+
+    Workspace:
+      type: object
+      required: [id, name, domain, createdAt]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        domain:
+          type: string
+        createdAt:
+          type: string
+
+    WorkspaceInput:
+      type: object
+      required: [name, domain]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        domain:
+          type: string
+          minLength: 1
+
+    ApiKey:
+      type: object
+      required: [id, workspaceId, name, prefix, createdAt]
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        name:
+          type: string
+        prefix:
+          type: string
+        createdAt:
+          type: string
+
+    ApiKeyInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+
+    ApiKeyWithSecret:
+      type: object
+      required: [id, workspaceId, name, prefix, createdAt, secret]
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        name:
+          type: string
+        prefix:
+          type: string
+        createdAt:
+          type: string
+        secret:
+          type: string
+
+    AnalyticsSummary:
+      type: object
+      required: [totalEvents, uniquePages, topEventName, changePercent]
+      properties:
+        totalEvents:
+          type: integer
+        uniquePages:
+          type: integer
+        topEventName:
+          type: ["string", "null"]
+        changePercent:
+          type: number
+
+    TimeseriesPoint:
+      type: object
+      required: [date, count]
+      properties:
+        date:
+          type: string
+        count:
+          type: integer
+
+    TopPage:
+      type: object
+      required: [url, count]
+      properties:
+        url:
+          type: string
+        count:
+          type: integer
+
+    TopReferrer:
+      type: object
+      required: [referrer, count]
+      properties:
+        referrer:
+          type: string
+        count:
+          type: integer
+
+    LiveStats:
+      type: object
+      required: [eventsLast5Min, eventsLast1Min]
+      properties:
+        eventsLast5Min:
+          type: integer
+        eventsLast1Min:
+          type: integer
