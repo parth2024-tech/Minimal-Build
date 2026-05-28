@@ -11,6 +11,18 @@ import {
 
 const router = Router();
 
+/**
+ * @openapi
+ * /api/workspaces/{workspaceId}/api-keys:
+ *   get:
+ *     summary: List API keys for a workspace
+ *     description: Retrieve all API keys associated with a given workspace ID.
+ *     responses:
+ *       200:
+ *         description: List of API keys.
+ *       400:
+ *         description: Validation error.
+ */
 router.get("/workspaces/:workspaceId/api-keys", async (req, res) => {
   const parsed = ListApiKeysParams.safeParse(req.params);
   if (!parsed.success) {
@@ -29,6 +41,18 @@ router.get("/workspaces/:workspaceId/api-keys", async (req, res) => {
   })));
 });
 
+/**
+ * @openapi
+ * /api/workspaces/{workspaceId}/api-keys:
+ *   post:
+ *     summary: Create a new API key
+ *     description: Creates a cryptographically secure API key for the workspace.
+ *     responses:
+ *       201:
+ *         description: Key created successfully. Includes secret token (only shown once).
+ *       400:
+ *         description: Validation error.
+ */
 router.post("/workspaces/:workspaceId/api-keys", async (req, res) => {
   const paramsParsed = CreateApiKeyParams.safeParse(req.params);
   if (!paramsParsed.success) {
@@ -59,6 +83,18 @@ router.post("/workspaces/:workspaceId/api-keys", async (req, res) => {
   });
 });
 
+/**
+ * @openapi
+ * /api/workspaces/{workspaceId}/api-keys/{keyId}:
+ *   delete:
+ *     summary: Delete an API key
+ *     description: Revoke and permanently delete a workspace's API key.
+ *     responses:
+ *       204:
+ *         description: API key successfully deleted.
+ *       400:
+ *         description: Validation error.
+ */
 router.delete("/workspaces/:workspaceId/api-keys/:keyId", async (req, res) => {
   const parsed = DeleteApiKeyParams.safeParse(req.params);
   if (!parsed.success) {
@@ -75,3 +111,4 @@ router.delete("/workspaces/:workspaceId/api-keys/:keyId", async (req, res) => {
 });
 
 export default router;
+
