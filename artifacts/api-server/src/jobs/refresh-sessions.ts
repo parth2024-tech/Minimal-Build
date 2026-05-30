@@ -1,14 +1,11 @@
-import { refreshMaterializedView } from "drizzle-orm/pg-core";
-import { db, dailySessionsMv } from "@workspace/db";
+import { refreshAnalyticsViews } from "../lib/refresh-analytics-views";
 import { logger } from "../lib/logger";
 
-async function refreshSessions() {
-  logger.info("Starting concurrent refresh of daily_sessions_mv...");
+async function main() {
   try {
-    await db.execute(refreshMaterializedView(dailySessionsMv).concurrently());
-    logger.info("Successfully refreshed daily_sessions_mv.");
+    await refreshAnalyticsViews();
   } catch (err) {
-    logger.error({ err }, "Failed to refresh daily_sessions_mv.");
+    logger.error({ err }, "Failed to refresh analytics materialized views");
     process.exit(1);
   }
   process.exit(0);
@@ -17,5 +14,7 @@ async function refreshSessions() {
 import { fileURLToPath } from "node:url";
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  refreshSessions();
+  main();
 }
+
+export { refreshAnalyticsViews };

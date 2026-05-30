@@ -1,15 +1,7 @@
 import { useState } from "react";
 import { useParams } from "wouter";
 import WorkspaceLayout from "@/components/WorkspaceLayout";
-import { 
-  useGetAnalyticsSummary, 
-  useGetTimeseries, 
-  useGetTopPages, 
-  useGetTopReferrers, 
-  useGetEventNames, 
-  useGetLiveStats,
-  useListSegments
-} from "@workspace/api-client-react";
+import { useDashboardSummary } from "@/hooks/use-dashboard-summary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart2, Users, Activity, TrendingUp, TrendingDown, Clock, Download, Filter } from "lucide-react";
@@ -22,39 +14,23 @@ export default function WorkspaceDashboard() {
   const [eventName, setEventName] = useState<string>("all");
   const [segmentId, setSegmentId] = useState<string>("all");
 
-  const { data: segments } = useListSegments(workspaceId!);
-
   const activeSegmentId = segmentId === "all" ? undefined : segmentId;
+  const activeEventName = eventName === "all" ? undefined : eventName;
 
-  const { data: summary, isLoading: loadingSummary } = useGetAnalyticsSummary({ 
-    workspaceId: workspaceId!, 
+  const { data, isLoading } = useDashboardSummary({
+    workspaceId: workspaceId!,
     days,
-    segmentId: activeSegmentId
+    eventName: activeEventName,
+    segmentId: activeSegmentId,
   });
-  
-  const { data: timeseries } = useGetTimeseries({ 
-    workspaceId: workspaceId!, 
-    days, 
-    eventName: eventName === "all" ? undefined : eventName,
-    segmentId: activeSegmentId
-  });
-  
-  const { data: topPages } = useGetTopPages({ 
-    workspaceId: workspaceId!, 
-    days, 
-    limit: 10,
-    segmentId: activeSegmentId
-  });
-  
-  const { data: topReferrers } = useGetTopReferrers({ 
-    workspaceId: workspaceId!, 
-    days, 
-    limit: 10,
-    segmentId: activeSegmentId
-  });
-  
-  const { data: eventNames } = useGetEventNames({ workspaceId: workspaceId! });
-  const { data: liveStats } = useGetLiveStats({ workspaceId: workspaceId! }, { query: { refetchInterval: 10000 } });
+
+  const summary = data?.summary;
+  const timeseries = data?.timeseries;
+  const topPages = data?.topPages;
+  const topReferrers = data?.topReferrers;
+  const eventNames = data?.eventNames;
+  const liveStats = data?.liveStats;
+  const segments = data?.segments;
 
   if (!workspaceId) return null;
 
@@ -137,7 +113,7 @@ export default function WorkspaceDashboard() {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground mb-1">Total Events</p>
                   <h3 className="text-3xl font-bold text-gray-900">
-                    {loadingSummary ? "-" : summary?.totalEvents.toLocaleString()}
+                    {isLoading ? "-" : summary?.totalEvents.toLocaleString()}
                   </h3>
                 </div>
                 <div className="p-3 bg-primary/10 rounded-lg">
@@ -165,7 +141,7 @@ export default function WorkspaceDashboard() {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground mb-1">Unique Pages</p>
                   <h3 className="text-3xl font-bold text-gray-900">
-                    {loadingSummary ? "-" : summary?.uniquePages.toLocaleString()}
+                    {isLoading ? "-" : summary?.uniquePages.toLocaleString()}
                   </h3>
                 </div>
                 <div className="p-3 bg-blue-50 rounded-lg">
@@ -181,7 +157,7 @@ export default function WorkspaceDashboard() {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground mb-1">Avg / day</p>
                   <h3 className="text-3xl font-bold text-gray-900">
-                    {loadingSummary ? "-" : summary?.avgEventsPerDay?.toLocaleString(undefined, { maximumFractionDigits: 1 }) || "0"}
+                    {isLoading ? "-" : summary?.avgEventsPerDay?.toLocaleString(undefined, { maximumFractionDigits: 1 }) || "0"}
                   </h3>
                 </div>
                 <div className="p-3 bg-orange-50 rounded-lg">
@@ -197,7 +173,7 @@ export default function WorkspaceDashboard() {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground mb-1">Top Event</p>
                   <h3 className="text-xl font-bold text-gray-900 truncate max-w-[120px]">
-                    {loadingSummary ? "-" : (summary?.topEventName || "None")}
+                    {isLoading ? "-" : (summary?.topEventName || "None")}
                   </h3>
                 </div>
                 <div className="p-3 bg-purple-50 rounded-lg">
@@ -215,7 +191,11 @@ export default function WorkspaceDashboard() {
           </CardHeader>
           <CardContent>
             <div className="h-[300px] w-full">
-              {timeseries && timeseries.length > 0 ? (
+              {isLoading ? (
+                <div className="h-full flex items-center justify-center text-muted-foreground">
+                  Loading chart…
+                </div>
+              ) : timeseries && timeseries.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={timeseries} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                     <defs>
@@ -273,7 +253,7 @@ export default function WorkspaceDashboard() {
                     </div>
                   </div>
                 ))}
-                {(!topPages || topPages.length === 0) && (
+                {!isLoading && (!topPages || topPages.length === 0) && (
                   <div className="text-sm text-muted-foreground text-center py-4">No pages recorded yet.</div>
                 )}
               </div>
@@ -296,7 +276,7 @@ export default function WorkspaceDashboard() {
                     </div>
                   </div>
                 ))}
-                {(!topReferrers || topReferrers.length === 0) && (
+                {!isLoading && (!topReferrers || topReferrers.length === 0) && (
                   <div className="text-sm text-muted-foreground text-center py-4">No referrers recorded yet.</div>
                 )}
               </div>

@@ -4,3 +4,4 @@ export * from "./events";
 export * from "./segments";
 export * from "./audit_logs";
 export * from "./sessions";
+export * from "./analytics-views";

@@ -9,7 +9,8 @@
   },
   "scripts": {
     "push": "drizzle-kit push --config ./drizzle.config.ts",
-    "push-force": "drizzle-kit push --force --config ./drizzle.config.ts"
+    "push-force": "drizzle-kit push --force --config ./drizzle.config.ts",
+    "migrate:analytics-mvs": "psql \"$DATABASE_URL\" -f ./migrations/001_analytics_materialized_views.sql"
   },
   "dependencies": {
     "drizzle-orm": "catalog:",
